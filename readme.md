@@ -1,0 +1,1 @@
+This is a Terraform repo for my Medium article on installing K3s hybrid architecture cluster in the Oracle Cloud using their always free tier.
