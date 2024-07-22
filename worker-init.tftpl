@@ -1,0 +1,16 @@
+#cloud-config
+package_update: true
+package_upgrade: true
+packages:
+  - netcat
+write_files:
+  - encoding: b64
+    content: ${base64encode(ssh_private_key)}
+    path: /home/ubuntu/cluster_key
+    permissions: '0600'
+runcmd:
+  - sudo chown ubuntu:ubuntu /home/ubuntu/cluster_key
+  - sleep 5
+  - until scp -o StrictHostKeyChecking=no -i /home/ubuntu/cluster_key ubuntu@${control_plane_ip}:/home/ubuntu/k3s_token /home/ubuntu/k3s_token; do sleep 10; done
+  - echo "Token copied successfully"
+  - curl -sfL https://get.k3s.io | K3S_URL=https://${control_plane_ip}:6443 K3S_TOKEN=$(cat /home/ubuntu/k3s_token) sh -

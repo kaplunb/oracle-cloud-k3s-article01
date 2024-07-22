@@ -1,0 +1,15 @@
+#cloud-config
+package_update: true
+package_upgrade: true
+packages:
+  - iptables-persistent
+runcmd:
+  - curl -sfL https://get.k3s.io | sh -
+  - until sudo k3s kubectl get node | grep Ready; do sleep 5; done
+  - iptables -I INPUT -p tcp --dport 6443 -j ACCEPT
+  - iptables -I INPUT -p tcp --dport 10250 -j ACCEPT
+  - iptables -I INPUT -p tcp --dport 2379:2380 -j ACCEPT
+  - iptables -I INPUT -p udp --dport 8472 -j ACCEPT
+  - iptables-save > /etc/iptables/rules.v4
+  - sudo cat /var/lib/rancher/k3s/server/token > /home/ubuntu/k3s_token
+  - chmod 644 /home/ubuntu/k3s_token
